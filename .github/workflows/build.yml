@@ -17,10 +17,11 @@ jobs:
           gradle-version: '8.2'
           cache-disabled: true
       - name: Set Custom App ID
-        run: sed -i 's/applicationId .*/applicationId \"com.custom.webwallpaper245928\"/g' app/build.gradle || true
+        run: sed -i 's/applicationId .*/applicationId \"com.custom.webwallpaper445936\"/g' app/build.gradle || true
       - name: Sanitize and Apply Custom Icon
         run: |
           sed -i '1!{/^[[:space:]]*$/d}' app/src/main/AndroidManifest.xml || true
+          sed -i '1s/^[[:space:]]*//' app/src/main/AndroidManifest.xml || true
           sed -i 's/android:icon="[^"]*"//g' app/src/main/AndroidManifest.xml || true
           sed -i 's/<application/<application android:icon="@drawable\/ic_launcher"/g' app/src/main/AndroidManifest.xml || true
       - name: Debug - Print Manifest
