@@ -23,12 +23,13 @@ jobs:
           export CORDOVA_NO_TELEMETRY=1
           export CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL=https\://services.gradle.org/distributions/gradle-8.7-all.zip
           cd /tmp
-          cordova create app com.aicompile.app "My App" --no-telemetry
+          cordova create app com.custom.webwallpaper482720 "Wallpaper" --no-telemetry
           rm -rf app/www/*
           cp -R $GITHUB_WORKSPACE/* app/www/ || true
           cd app
           sed -i 's/version="1.0.0"/version="1.0.0"/g' config.xml
           sed -i 's/<\/widget>/\n    <allow-navigation href="*" \/>\n    <allow-intent href="*" \/>\n<\/widget>/g' config.xml
+          sed -i 's/<\/widget>/\n    <icon src="icon.png" \/>\n<\/widget>/g' config.xml
           cordova plugin add cordova-plugin-inappbrowser --no-telemetry || true
           cordova platform add android@13.0.0 --no-telemetry
           cordova build android --no-telemetry
