@@ -16,18 +16,25 @@ jobs:
         with:
           gradle-version: '8.2'
           cache-disabled: true
-      - name: Set Custom App ID
-        run: sed -i 's/applicationId .*/applicationId \"com.custom.webwallpaper037399\"/g' app/build.gradle || true
+      - name: Set Custom App ID, Namespace, and Name
+        run: |
+          sed -i 's/applicationId.*/applicationId = \"com.custom.webwallpaper690100\"/g' app/build.gradle.kts || true
+          sed -i 's/applicationId .*/applicationId \"com.custom.webwallpaper690100\"/g' app/build.gradle || true
+          sed -i 's/namespace.*/namespace = \"com.custom.webwallpaper690100\"/g' app/build.gradle.kts || true
+          sed -i 's/namespace .*/namespace \"com.custom.webwallpaper690100\"/g' app/build.gradle || true
+          sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">My App<\/string>/g' app/src/main/res/values/strings.xml || true
       - name: Sanitize and Apply Custom Icon
         run: |
           sed -i '1!{/^[[:space:]]*$/d}' app/src/main/AndroidManifest.xml || true
           sed -i '1s/^[[:space:]]*//' app/src/main/AndroidManifest.xml || true
           sed -i 's/android:icon="[^"]*"//g' app/src/main/AndroidManifest.xml || true
-          sed -i 's/<application/<application android:icon="@drawable\/ic_launcher"/g' app/src/main/AndroidManifest.xml || true
+          echo 'No custom icon'
       - name: Debug - Print Manifest
         run: cat app/src/main/AndroidManifest.xml
       - name: Build Debug APK
-        run: gradle assembleDebug
+        run: |
+          chmod +x gradlew || true
+          ./gradlew assembleDebug --stacktrace || gradle assembleDebug --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
