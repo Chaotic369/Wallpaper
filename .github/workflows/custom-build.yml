@@ -1,46 +1,42 @@
-name: Build APK (Native Wallpaper App)
-on:
-  workflow_dispatch:
-    inputs:
-      app_name:
-        description: 'App display name'
-        required: false
-        default: 'My App'
-      app_version:
-        description: 'App version'
-        required: false
-        default: '1.0.0'
+name: Build APK
+on: [workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Source
+      - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Setup Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
-
-      - name: Accept SDK licenses
-        run: yes | sdkmanager --licenses > /dev/null || true
-
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.9
-
+          gradle-version: '8.2'
+          cache-disabled: true
+      - name: Set Custom App ID, Namespace, and Name
+        run: |
+          sed -i 's/applicationId.*/applicationId = \"com.custom.webwallpaper690100\"/g' app/build.gradle.kts || true
+          sed -i 's/applicationId .*/applicationId \"com.custom.webwallpaper690100\"/g' app/build.gradle || true
+          sed -i 's/namespace.*/namespace = \"com.custom.webwallpaper690100\"/g' app/build.gradle.kts || true
+          sed -i 's/namespace .*/namespace \"com.custom.webwallpaper690100\"/g' app/build.gradle || true
+          sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">My App<\/string>/g' app/src/main/res/values/strings.xml || true
+      - name: Sanitize and Apply Custom Icon
+        run: |
+          sed -i '1!{/^[[:space:]]*$/d}' app/src/main/AndroidManifest.xml || true
+          sed -i '1s/^[[:space:]]*//' app/src/main/AndroidManifest.xml || true
+          sed -i 's/android:icon="[^"]*"//g' app/src/main/AndroidManifest.xml || true
+          echo 'No custom icon'
+      - name: Debug - Print Manifest
+        run: cat app/src/main/AndroidManifest.xml
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon
-
+        run: |
+          chmod +x gradlew || true
+          ./gradlew assembleDebug --stacktrace || gradle assembleDebug --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Android-APK
+          name: WebWallpaper-APK
           path: app/build/outputs/apk/debug/app-debug.apk 
